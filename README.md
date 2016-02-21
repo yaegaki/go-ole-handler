@@ -3,6 +3,11 @@ A utility for go-ole
 
 Thread safe and Release safe.(If close top olehandler, close all children.)
 
+## Install
+```sh
+go get -u github.com/yaegaki/go-ole-handler
+```
+
 ## Sample
 ```go
 package main
