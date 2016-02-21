@@ -169,6 +169,51 @@ func (o *OleHandler) GetOleHandlerWithCallbackAndArgs(property string, fn func(*
 	})
 }
 
+func (o *OleHandler) GetOleHandlerByMethod(method string) (handler *OleHandler, err error) {
+	err = o.GetOleHandlerWithCallbackAndArgs(method, func(h *OleHandler) error {
+		handler = h
+		return nil
+	})
+
+	return handler, err
+}
+
+func (o *OleHandler) GetOleHandlerWithArgsByMethod(method string, args ...interface{}) (handler *OleHandler, err error) {
+	err = o.GetOleHandlerWithCallbackAndArgs(method, func(h *OleHandler) error {
+		handler = h
+		return nil
+	}, args...)
+
+	return handler, err
+}
+
+func (o *OleHandler) GetOleHandlerWithCallbackByMethod(method string, fn func(*OleHandler) error) error {
+	return o.GetOleHandlerWithCallbackAndArgs(method, fn)
+}
+
+func (o *OleHandler) GetOleHandlerWithCallbackAndArgsByMethod(method string, fn func(*OleHandler) error, args ...interface{}) error {
+	return o.SafeAccess(func() error {
+		v, err := o.Handle.CallMethod(method, args...)
+		if err != nil {
+			return err
+		}
+		handle := v.ToIDispatch()
+		if handle == nil {
+			return errors.New(fmt.Sprintf("%v handle is nil.", method))
+		}
+
+		handler := CreateOleHandler(o, handle)
+		err = fn(handler)
+		if err != nil {
+			handler.Close()
+			return err
+		}
+
+		o.children = append(o.children, handler)
+		return nil
+	})
+}
+
 func (o *OleHandler) GetProperty(property string, args ...interface{}) (result *ole.VARIANT, err error) {
 	o.SafeAccess(func() error {
 		result, err = o.Handle.GetProperty(property, args...)
@@ -217,4 +262,13 @@ func (o *OleHandler) CallMethod(property string, args ...interface{}) error {
 		_, err := o.Handle.CallMethod(property, args...)
 		return err
 	})
+}
+
+func (o *OleHandler) CallMethodWithResult(property string, args ...interface{}) (v *ole.VARIANT, err error) {
+	err = o.SafeAccess(func() error {
+		v, err = o.Handle.CallMethod(property, args...)
+		return err
+	})
+
+	return v, err
 }
