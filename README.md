@@ -1,7 +1,7 @@
 # go-ole-handler
 A utility for go-ole
 
-Thread safe and Release safe.(If close root olehandler, close all children.)
+Thread(goroutine) safe and Release safe.(If close root olehandler, close all children.)
 
 ## Install
 ```sh
