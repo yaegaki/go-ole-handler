@@ -154,7 +154,7 @@ func (o *OleHandler) GetOleHandlerWithCallbackAndArgs(property string, fn func(*
 		}
 		handle := v.ToIDispatch()
 		if handle == nil {
-			return errors.New(fmt.Sprintf("%v is not handle.", property))
+			return errors.New(fmt.Sprintf("%v handle is nil.", property))
 		}
 
 		handler := CreateOleHandler(o, handle)
